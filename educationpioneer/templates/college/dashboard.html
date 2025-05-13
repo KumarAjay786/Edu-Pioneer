@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block start %}
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-university me-2"></i>
+                College Dashboard 
+                <span class="badge bg-light text-dark">{{ total_colleges }} Colleges</span>
+            </h3>
+        </div>
+        
+        <div class="card-body">
+            <!-- Filters Form -->
+            <form id="filterForm" method="get" action="{% url 'college_dashboard' %}">
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="Search by college name" 
+                               id="searchInput" name="search" value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="districtFilter" name="district">
+                            <option value="">All Districts</option>
+                            {% for d in district %}
+                            <option value="{{ d }}" {% if request.GET.district == d %}selected{% endif %}>
+                                {{ d }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="stateFilter" name="state">
+                            <option value="">All States</option>
+                            {% for state in states %}
+                            <option value="{{ state }}" {% if request.GET.state == state %}selected{% endif %}>
+                                {{ state }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="countryFilter" name="country">
+                            <option value="">All Countries</option>
+                            {% for country in countries %}
+                            <option value="{{ country }}" {% if request.GET.country == country %}selected{% endif %}>
+                                {{ country }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Data Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>College Name</th>
+                            <th>Email</th>
+                            <th>Country</th>
+                            <th>State</th>
+                            <th>District</th>
+                            <th>Registered On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for college in page_obj %}
+                        <tr>
+                            <td>{{ college.name }}</td>
+                            <td>{{ college.email }}</td>
+                            <td>{{ college.country }}</td>
+                            <td>{{ college.state }}</td>
+                            <td>{{ college.district }}</td>
+                            <td>{{ college.created_at|date:"d M Y" }}</td>
+                            <td class="d-flex gap-1">
+                                <!-- View Button -->
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary view-details" data-id="{{ college.id }}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <!-- Delete Button Form -->
+                                <form method="POST" action="{% url 'college_delete' college.id %}" onsubmit="return confirm('Are you sure you want to delete this college?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No colleges found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">College Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detailContent">
+                <!-- AJAX content loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Modal fetch
+    document.querySelectorAll('.view-details').forEach(button => {
+        button.addEventListener('click', function () {
+            const collegeId = this.dataset.id;
+            fetch(`/college/${collegeId}/detail/`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('detailContent').innerHTML = data;
+                    new bootstrap.Modal(document.getElementById('detailModal')).show();
+                })
+                .catch(error => {
+                    alert("Failed to load college details.");
+                    console.error(error);
+                });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block start %}
+  <style>
+    :root {
+        --primary-color: #3f51b5;
+        --secondary-color: #ff5722;
+        --dark-color: #263238;
+        --light-color: #f5f5f5;
+    }
+    .consultation-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .consultation-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.03;
+    }
+    
+    .section-title {
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 50px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .benefit-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s ease;
+        height: 100%;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .benefit-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(45deg, #6ed863, #0085c9);
+        transition: all 0.4s ease;
+    }
+    
+    .benefit-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .benefit-card:hover::before {
+        width: 100%;
+        opacity: 0.1;
+    }
+    
+    .benefit-icon {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #0085c9;
+        transition: all 0.4s ease;
+    }
+    
+    .benefit-card:hover .benefit-icon {
+        transform: scale(1.1);
+        color: #56b04e;
+    }
+    
+    .benefit-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--dark-color);
+        position: relative;
+        display: inline-block;
+    }
+    
+    .benefit-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: #0085c9;
+        border-radius: 2px;
+        transition: all 0.4s ease;
+    }
+    
+    .benefit-card:hover .benefit-title::after {
+        width: 60px;
+    }
+    
+    .benefit-desc {
+        color: #666;
+        font-size: 0.95rem;
+    }
+    
+    .cta-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(63, 81, 181, 0.3);
+    }
+    
+    .cta-button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255, 87, 34, 0.3);
+    }
+    
+    .floating-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+    }
+    
+    .shape {
+        position: absolute;
+        opacity: 0.1;
+        border-radius: 50%;
+    }
+    
+    .shape-1 {
+        width: 150px;
+        height: 150px;
+        background: #0085c9;
+        top: 10%;
+        left: 5%;
+        animation: float 8s infinite ease-in-out;
+    }
+    
+    .shape-2 {
+        width: 200px;
+        height: 200px;
+        background: #0085c9;
+        bottom: 10%;
+        right: 5%;
+        animation: float 10s infinite ease-in-out;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+    }
+</style>
+
+  <main>
+    <section class="about_page-hero">
+        <!-- Animated Background Layer -->
+        <div class="about_page-bg"></div>
+  
+        <!-- Content Container -->
+        <div class="container">
+          <div class="about_page-content">
+            <!-- Main Heading with Animation -->
+            <h2 class="about_page-heading">
+              <span class="about_page-heading-word">Book Your Free Education Consultation Today</span>
+            </h2>
+  
+            <!-- Animated Divider -->
+            <div class="about_page-divider"></div>
+  
+            <!-- Subheading with Typewriter Effect -->
+            <p class="about_page-subheading"></p>
+  
+            <div class="about_page-mission">
+              <p>Get personalized guidance from our experts to find the best educational path for your future.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <section class="consultation-section">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+        </div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Our Consultation Benefits</h2>
+                    <p class="lead mb-5">We provide comprehensive guidance to help you achieve your international education dreams with confidence and ease.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h4 class="benefit-title">Career Path Assessment</h4>
+                        <p class="benefit-desc">Our experts analyze your skills, interests, and goals to recommend the perfect career path and educational programs.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <h4 class="benefit-title">University Shortlisting</h4>
+                        <p class="benefit-desc">We help you identify the best universities worldwide that match your profile, budget, and career aspirations.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h4 class="benefit-title">Application Strategy</h4>
+                        <p class="benefit-desc">Tailored application plans with timeline management, document preparation, and presentation optimization.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h4 class="benefit-title">Scholarship Guidance</h4>
+                        <p class="benefit-desc">Expert advice on finding and applying for scholarships, grants, and financial aid to reduce your education costs.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-passport"></i>
+                        </div>
+                        <h4 class="benefit-title">Visa Assistance</h4>
+                        <p class="benefit-desc">Complete support for visa applications, documentation, interview preparation, and post-approval formalities.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h4 class="benefit-title">Post-Admission Support</h4>
+                        <p class="benefit-desc">Continued assistance with accommodation, orientation, and settling in to ensure a smooth transition.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="edu-booking-section" id="agent_booking_section_form">
+      <div class="container">
+          <div class="edu-booking-container">
+              <div class="edu-booking-header">
+                <h2 class="edu-booking-title">Agent Registration Form</h2>
+              </div>
+              
+              <form class="edu-booking-form">
+                  <div class="row">
+                      <div class="col-md-4">
+                          <div class="edu-form-group edu-form-required">
+                              <label for="agent-name" class="edu-form-label">Full Name</label>
+                              <input type="text" id="agent-name" class="edu-form-control" placeholder="Enter agent full name">
+                          </div>
+                          
+                          <div class="edu-form-group">
+                              <label for="agent-web" class="edu-form-label">Web Details</label>
+                              <input type="text" id="agent-web" class="edu-form-control" placeholder="Website or social media links">
+                          </div>
+                      </div>
+                      
+                      <div class="col-md-4">
+                          <div class="edu-form-group edu-form-required">
+                              <label for="agent-email" class="edu-form-label">Email Address</label>
+                              <input type="email" id="agent-email" class="edu-form-control" placeholder="Enter agent email">
+                          </div>
+                          
+                          <div class="edu-form-group edu-form-required">
+                              <label for="agent-mobile" class="edu-form-label">Mobile Number</label>
+                              <input type="tel" id="agent-mobile" class="edu-form-control" placeholder="Enter mobile number">
+                          </div>
+                      </div>
+                      
+                      <div class="col-md-4">
+                          <div class="edu-form-group edu-form-required">
+                              <label for="agent-contact" class="edu-form-label">Contact Person</label>
+                              <input type="text" id="agent-contact" class="edu-form-control" placeholder="Primary contact person">
+                          </div>
+                          
+                          <div class="edu-form-group">
+                              <label for="agent-address" class="edu-form-label">Address</label>
+                              <textarea id="agent-address" class="edu-form-control" placeholder="Full business address"></textarea>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-4">
+                        <label for="agent-country" class="form-label">Country<span class="red_colored_requred_mark">*</span></label>
+                        <select id="agent-country" class="form-select" required>
+                          <option value="">Select Country</option>
+                      </select>
+                    </div>
+                
+                    <div class="col-md-4">
+                        <label for="agent-state" class="form-label">State<span class="red_colored_requred_mark">*</span></label>
+                        <select id="agent-state" class="form-select" required>
+                            <option value="" selected disabled>Select state</option>
+                        </select>
+                    </div>
+                
+                    <div class="col-md-4">
+                        <label for="agent-district" class="form-label">District<span class="red_colored_requred_mark">*</span></label>
+                        <select id="agent-district" class="form-select"  required>
+                            <option value="" selected disabled>First select state</option>
+                        </select>
+                    </div>
+                </div>
+                
+                
+                  <center><button type="submit" class="edu-submit-btn">Register as Agent</button></center>
+              </form>
+          </div>
+      </div>
+  </section>
+  </main>
+
+  <script src="js/agent_contry_state_dist.js"></script>
+
+{% endblock  %}

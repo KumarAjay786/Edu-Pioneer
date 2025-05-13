@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block start %}
+
+
+      <section class="college_register_form_page_body">
+
+    
+        <div class="college_register_form_page_container">
+        <div class="college_register_form_page_card">
+            <div class="college_register_form_page_header">
+                <h1 class="college_register_form_page_title">College Registration</h1>
+            </div>
+            
+            <div class="card-body p-4">
+                <form id="college_register_form_page_form">
+                    <!-- College Information Section -->
+                    <h5 class="mb-4" style="color: #3a7bd5; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">College Details</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">College Name</label>
+                                <input type="text" class="form-control college_register_form_page_form_control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label">Website URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                    <input type="url" class="form-control college_register_form_page_form_control" placeholder="https://">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control college_register_form_page_form_control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">Mobile Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control college_register_form_page_form_control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Section -->
+                    <h5 class="mb-4 mt-5" style="color: #3a7bd5; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Address Information</h5>
+                    
+                    <div class="college_register_form_page_form_group">
+                        <label class="college_register_form_page_form_label college_register_form_page_required_field">Full Address</label>
+                        <textarea class="form-control college_register_form_page_form_control" rows="3" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">District</label>
+                                <input type="text" class="form-control college_register_form_page_form_control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">State</label>
+                                <input type="text" class="form-control college_register_form_page_form_control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="college_register_form_page_form_group">
+                                <label class="college_register_form_page_form_label college_register_form_page_required_field">Country</label>
+                                <input type="text" class="form-control college_register_form_page_form_control" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <div class="college_register_form_page_form_group">
+                        <button type="submit" class="btn college_register_form_page_submit_btn">
+                            <i class="fas fa-paper-plane me-2"></i> Submit Registration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock  %}
