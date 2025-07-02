@@ -1,0 +1,367 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>College List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <style>
+        .college_list_card_outer {
+            display: flex;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .institution-image-wrapper {
+            width: 250px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .swiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .institution-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .institution-details {
+            padding: 15px;
+            flex: 1;
+            position: relative;
+        }
+
+        .institution-logo {
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .institution-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .institution-location {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .courses-tags {
+            margin: 10px 0;
+        }
+
+        .course-tag {
+            display: inline-block;
+            background-color: #e5e7eb;
+            color: #333;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .view-btn,
+        .apply-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .apply-btn {
+            background-color: #28a745;
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: white;
+        }
+        .icon_con_info_em{
+            width: 30px; height: 30px; 
+            background: #2561e8; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%;
+        }
+        .icon_con_info_em_inside{
+            margin: 0px!important;
+            padding: 0px!important;
+            color: white!important;
+        }
+    </style>
+</head>
+<body>
+
+{% for college in colleges %}
+<div class="institution-card college_list_card_outer">
+    <div class="institution-image-wrapper">
+        {% if college.images.all.count > 0 %}
+        <div class="swiper college-image-slider">
+            <div class="swiper-wrapper">
+                {% for image in college.images.all %}
+                <div class="swiper-slide">
+                    <img src="{{ image.image.url }}" class="institution-image" alt="{{ college.name }}">
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+        {% else %}
+        <img src="https://cdn1.iconfinder.com/data/icons/business-company-1/500/image-512.png"
+             class="institution-image" alt="No image">
+        {% endif %}
+    </div>
+
+    <div class="institution-details">
+        {% if college.logo %}
+        <img src="{{ college.logo.url }}" class="institution-logo" alt="{{ college.name }} logo">
+        {% else %}
+        <img src="https://img.freepik.com/premium-vector/emblem-blank-template-logo-icon-illustration-brand-identity_7109-1192.jpg"
+             class="institution-logo" alt="No image">
+        {% endif %}
+
+        <h5 class="institution-name">{{ college.name }}</h5>
+        <div class="courses-tags">
+            {% for course in college.course_set.all %}
+                <span class="course-tag">{{ course.name }}</span>
+            {% empty %}
+                <span class="course-tag">No courses listed</span>
+            {% endfor %}
+        </div>
+        
+        <p class="institution-location"><span class="icon_con_info_em">
+            <i class="fas fa-envelope-open-text icon_con_info_em_inside" style="font-size: 14px; color: white;"></i>
+          </span>&nbsp;
+           {{ college.email }} ,&nbsp; <span class="icon_con_info_em"><i class="fas fa-globe-africa icon_con_info_em_inside"></i></span> &nbsp; {{ college.website }}</p>
+        <p class="institution-location"><i class="fas fa-map-marker-alt"></i> {{college.address}} , {{ college.district }}, {{ college.state }} ,{{ college.country }} </p>
+<div class="button-group">
+            <a href="{% url 'college_detail' college.id %}" class="view-btn">View Details</a>
+            {% if request.session.user_id %}
+                <button class="apply-btn" data-bs-toggle="modal" data-bs-target="#applyModal{{ college.id }}">
+                    Apply
+                </button>
+            {% else %}
+                <a href="{% url 'login_view' %}" class="apply-btn">Login to Apply</a>
+            {% endif %}
+        </div>
+        
+        
+    </div>
+</div>
+<!-- Bootstrap Modal for Course Selection -->
+<!-- Bootstrap Modal for Course Selection -->
+<div class="modal fade" id="applyModal{{ college.id }}" tabindex="-1" aria-labelledby="applyModalLabel{{ college.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="applyForm{{ college.id }}" class="application-form">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applyModalLabel{{ college.id }}">Apply to {{ college.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="applicationAlert{{ college.id }}" class="alert d-none" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label for="student-country-{{ college.id }}" class="form-label">Your Country<span class="text-danger">*</span></label>
+                        <select id="student-country-{{ college.id }}" name="student-country" class="form-select select_student_country" required>
+                            <option value="">Select Country</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="student-state-{{ college.id }}" class="form-label">Your State<span class="text-danger">*</span></label>
+                        <select id="student-state-{{ college.id }}" name="student-state" class="form-select select_student_state" required>
+                            <option value="" disabled selected>Select State</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="student-district-{{ college.id }}" class="form-label">Your District<span class="text-danger">*</span></label>
+                        <select id="student-district-{{ college.id }}" name="student-district" class="form-select select_student_district" required>
+                            <option value="" disabled selected>First select state</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="course-select-{{ college.id }}" class="form-label">Select Course<span class="text-danger">*</span></label>
+                        <select id="course-select-{{ college.id }}" name="course_id" class="form-select" required>
+                            <option value="">Select a course</option>
+                            {% for course in college.course_set.all %}
+                            <option value="{{ course.id }}">{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="college_id" value="{{ college.id }}">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('[id^="applyForm"]').forEach(form => {
+              form.addEventListener('submit', function (e) {
+                  e.preventDefault();
+      
+                  const formData = new FormData(this);
+      
+                  fetch("{% url 'apply_to_course' %}", {
+                      method: 'POST',
+                      body: formData
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                      const alertBox = document.getElementById('applicationAlert');
+                      alertBox.textContent = data.message;
+                      alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+                      alertBox.classList.add(data.status === 'success' ? 'alert-success' : 'alert-danger');
+                      setTimeout(() => {
+                          alertBox.classList.add('d-none');
+                      }, 4000);
+                  });
+              });
+          });
+      });
+      </script>
+{% empty %}
+<div class="col-12">
+    <div class="alert alert-info text-center">No colleges found matching your criteria.</div>
+</div>
+{% endfor %}
+
+<script src="js/student_contry_state_dist.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+// Initialize Swiper sliders
+document.addEventListener("DOMContentLoaded", function () {
+    const sliders = document.querySelectorAll('.college-image-slider');
+    sliders.forEach((slider) => {
+        new Swiper(slider, {
+            loop: true,
+            spaceBetween: 10,
+            slidesPerView: 1,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false
+            },
+            navigation: {
+                nextEl: slider.querySelector('.swiper-button-next'),
+                prevEl: slider.querySelector('.swiper-button-prev')
+            }
+        });
+    });
+
+    // Initialize country/state/district dropdowns for each modal
+    document.querySelectorAll('.application-form').forEach(form => {
+        const countrySelect = form.querySelector('.select_student_country');
+        const stateSelect = form.querySelector('.select_student_state');
+        const districtSelect = form.querySelector('.select_student_district');
+        const alertBox = form.querySelector('.alert');
+
+        // Populate countries
+        for (let country in locationData) {
+            countrySelect.innerHTML += `<option value="${country}">${country}</option>`;
+        }
+
+        // Country change handler
+        countrySelect.addEventListener('change', () => {
+            const selectedCountry = countrySelect.value;
+            stateSelect.innerHTML = '<option value="" disabled selected>Select State</option>';
+            districtSelect.innerHTML = '<option value="" disabled selected>First select state</option>';
+            
+            if (locationData[selectedCountry]) {
+                for (let state in locationData[selectedCountry]) {
+                    stateSelect.innerHTML += `<option value="${state}">${state}</option>`;
+                }
+            }
+        });
+
+        // State change handler
+        stateSelect.addEventListener('change', () => {
+            const selectedCountry = countrySelect.value;
+            const selectedState = stateSelect.value;
+            districtSelect.innerHTML = '<option value="" disabled selected>Select District</option>';
+            
+            if (locationData[selectedCountry] && locationData[selectedCountry][selectedState]) {
+                locationData[selectedCountry][selectedState].forEach(district => {
+                    districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
+                });
+            }
+        });
+
+        // Form submission handler
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch("{% url 'apply_to_course' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alertBox.textContent = data.message;
+                alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+                alertBox.classList.add(data.status === 'success' ? 'alert-success' : 'alert-danger');
+                alertBox.classList.remove('d-none');
+                
+                if (data.status === 'success') {
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(form.closest('.modal')).hide();
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                alertBox.textContent = 'Error submitting application';
+                alertBox.classList.remove('d-none', 'alert-success');
+                alertBox.classList.add('alert-danger');
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>

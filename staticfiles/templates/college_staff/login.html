@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block start %}
+<style>
+    .staff-auth-wrapper {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
+    .staff-auth-card {
+        width: 100%;
+        max-width: 420px;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transform: translateY(0);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .staff-auth-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+    
+    .staff-auth-header {
+        background-color: #1e293b;
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .staff-auth-header h3 {
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .staff-auth-header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    }
+    
+    .staff-auth-body {
+        padding: 2.5rem;
+        background-color: white;
+    }
+    
+    .staff-auth-logo {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 1rem;
+        display: inline-block;
+        background-color: #3b82f6;
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    
+    .staff-auth-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .staff-auth-subtitle {
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 0.875rem;
+    }
+    
+    .staff-auth-alert {
+        border-radius: 8px;
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: #fef2f2;
+    }
+    
+    .staff-auth-form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .staff-auth-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #334155;
+        font-size: 0.875rem;
+    }
+    
+    .staff-auth-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.3s;
+        font-size: 0.9375rem;
+    }
+    
+    .staff-auth-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+    
+    .staff-auth-btn {
+        width: 100%;
+        padding: 1rem;
+        background-color: #1e293b;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 0.5rem;
+    }
+    
+    .staff-auth-btn:hover {
+        background-color: #0f172a;
+        transform: translateY(-2px);
+    }
+    
+    .staff-auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.8125rem;
+        color: #64748b;
+    }
+    
+    .staff-auth-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    
+    .staff-auth-link:hover {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+    
+    .input-with-icon {
+        position: relative;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    
+    .input-with-icon input {
+        padding-left: 2.75rem !important;
+    }
+</style>
+
+<div class="staff-auth-wrapper">
+    <div class="staff-auth-card">
+        <div class="staff-auth-header">
+            <h3>College Staff Authentication</h3>
+        </div>
+        <div class="staff-auth-body">
+            <div class="text-center mb-4">
+                <div class="staff-auth-logo">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h2 class="staff-auth-title">Welcome Back</h2>
+                <p class="staff-auth-subtitle">Please enter your credentials to access the staff portal</p>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="staff-auth-alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="POST" action="{% url 'college_staff_login' %}">
+                {% csrf_token %}
+                
+                <div class="staff-auth-form-group">
+                    <label for="college_id" class="staff-auth-label">College ID</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-id-card input-icon"></i>
+                        <input type="text" class="staff-auth-input" 
+                               id="college_id" name="college_id" 
+                               placeholder="Enter your college ID" required>
+                    </div>
+                </div>
+                
+                <div class="staff-auth-form-group">
+                    <label for="password" class="staff-auth-label">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" class="staff-auth-input" 
+                               id="password" name="password" 
+                               placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="staff-auth-btn">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </button>
+            </form>
+            
+            {% comment %} <div class="staff-auth-footer">
+                <a href="#!" class="staff-auth-link">Contact support</a>
+            </div> {% endcomment %}
+        </div>
+    </div>
+</div>
+{% endblock %}

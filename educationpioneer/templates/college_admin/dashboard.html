@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block start %}
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-university me-2"></i>
+                College Dashboard 
+                <span class="badge bg-light text-dark">{{ total_colleges }} Colleges</span>
+            </h3>
+            <a href="{% url 'college_admin_logout' %}" class="btn btn-light btn-sm">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+        </div>
+        
+        <div class="card-body">
+            <!-- Tabs for College and Student Sign Up -->
+            <ul class="nav nav-pills" id="dashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="college-tab" data-bs-toggle="pill" href="#college" role="tab" aria-controls="college" aria-selected="true">College</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="student-tab" data-bs-toggle="pill" href="#student" role="tab" aria-controls="student" aria-selected="false">Student Signup</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="applications-tab" data-bs-toggle="pill" href="#applications" role="tab" aria-controls="applications" aria-selected="false">Applied to Colleges</a>
+                </li>
+                <li class="nav-item" role="presentation">
+    <a class="nav-link" id="qa-tab" data-bs-toggle="pill" href="#qapply" role="tab" aria-controls="qapply" aria-selected="false">Applications</a>
+</li>
+                <li class="nav-item" role="presentation">
+        <a class="nav-link" id="agents-tab" data-bs-toggle="pill" href="#agents" role="tab" aria-controls="agents" aria-selected="false">Agents</a>
+    </li>
+            </ul>
+            
+            <div class="tab-content mt-4">
+                <!-- College Tab -->
+                <div class="tab-pane fade show active" id="college" role="tabpanel" aria-labelledby="college-tab">
+                    <!-- College Filters Form -->
+                    <form id="filterForm" method="get" action="{% url 'college_dashboard' %}">
+                        <div class="row mb-4">
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" placeholder="Search by college name" 
+                                       id="searchInput" name="search" value="{{ request.GET.search }}">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="districtFilter" name="district">
+                                    <option value="">All Districts</option>
+                                    {% for d in district %}
+                                    <option value="{{ d }}" {% if request.GET.district == d %}selected{% endif %}>
+                                        {{ d }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="stateFilter" name="state">
+                                    <option value="">All States</option>
+                                    {% for state in states %}
+                                    <option value="{{ state }}" {% if request.GET.state == state %}selected{% endif %}>
+                                        {{ state }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="countryFilter" name="country">
+                                    <option value="">All Countries</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country }}" {% if request.GET.country == country %}selected{% endif %}>
+                                        {{ country }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- College Data Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Logo</th>
+                                    <th>College Name</th>
+                                    <th>ID</th>
+                                    <th>Password</th>
+                                    <th>Email</th>
+                                    <th>Country</th>
+                                    <th>State</th>
+                                    <th>District</th>
+                                    <th>Registered On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for college in page_obj %}
+                                <tr>
+                                    <td>
+                                        {% if college.logo %}
+                                            <img src="{{ college.logo.url }}" alt="College Logo" width="100">
+                                        {% else %}
+                                            No logo uploaded
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ college.name }}</td>
+                                    <td>{{ college.college_id }}</td>
+                                    <td>{{ college.password }}</td>
+                                    <td>{{ college.email }}</td>
+                                    <td>{{ college.country }}</td>
+                                    <td>{{ college.state }}</td>
+                                    <td>{{ college.district }}</td>
+                                    <td>{{ college.created_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <!-- Manage Courses -->
+                                        <a href="{% url 'manage_courses' college.id %}" class="btn btn-sm btn-outline-primary" title="Manage Courses">
+                                            <i class="fas fa-book"></i>
+                                        </a>
+                                    
+                                        <!-- Toggle Approve -->
+                                        <a href="{% url 'toggle_approve' college.id %}" class="btn btn-sm 
+    {% if college.is_approved %}
+        btn-outline-success  <!-- Green color for Approved -->
+    {% else %}
+        btn-outline-danger  <!-- Red color for Not Approved -->
+    {% endif %}
+" title="{% if college.is_approved %}Reject College{% else %}Approve College{% endif %}">
+    {% if college.is_approved %}
+        <i class="fas fa-check-circle"></i>  <!-- Approved icon -->
+    {% else %}
+        <i class="fas fa-times-circle"></i>  <!-- Not approved icon -->
+    {% endif %}
+</a>
+
+                                        
+                                    
+                                        <!-- Delete College -->
+                                       <form action="{% url 'college_delete' college.id %}" method="POST" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                onclick="return confirm('Are you sure you want to delete this college?');">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
+                                    </td>
+                                    
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No colleges found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% else %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+
+                <!-- Student Signup Tab -->
+                <div class="tab-pane fade" id="student" role="tabpanel" aria-labelledby="student-tab">
+                    <!-- Student Data Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Profile Picture</th>
+                                    <th>Registered On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.username }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <td>{{ student.phone }}</td>
+                                    <td>
+                                        {% if student.profile_pic %}
+                                            <img src="{{ student.profile_pic.url }}" alt="Profile Pic" width="50">
+                                        {% else %}
+                                            No profile pic
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ student.created_at|date:"d M Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No students found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+<!-- Agents Tab -->
+    <div class="tab-pane fade" id="agents" role="tabpanel" aria-labelledby="agents-tab">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Profile Pic</th>
+                        <th>Agent ID</th>
+                        <th>Password</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Country</th>
+                        <th>State</th>
+                        <th>District</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agent in agents %}
+                    <tr>
+                        <td>
+                            {% if agent.profile_pic %}
+                                <img src="{{ agent.profile_pic.url }}" alt="Agent Profile" width="50">
+                            {% else %}
+                                No profile pic
+                            {% endif %}
+                        </td>
+                        <td>{{ agent.agent_id }}</td>
+                        <td>{{ agent.password }}</td>
+                        <td>{{ agent.full_name }}</td>
+                        <td>{{ agent.email }}</td>
+                        <td>{{ agent.mobile }}</td>
+                        <td>{{ agent.country }}</td>
+                        <td>{{ agent.state }}</td>
+                        <td>{{ agent.district }}</td>
+                        <td>
+                            {% if agent.is_approved %}
+                                <span class="badge bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- Toggle Approve -->
+                            <a href="{% url 'toggle_agent_approve' agent.id %}" class="btn btn-sm 
+                                {% if agent.is_approved %}
+                                    btn-outline-success
+                                {% else %}
+                                    btn-outline-danger
+                                {% endif %}" 
+                                title="{% if agent.is_approved %}Reject Agent{% else %}Approve Agent{% endif %}">
+                                {% if agent.is_approved %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i>
+                                {% endif %}
+                            </a>
+                            
+                            <!-- Delete Agent -->
+                            <a href="{% url 'agent_delete' agent.id %}" class="btn btn-sm btn-outline-danger" 
+                               title="Delete Agent" 
+                               onclick="return confirm('Are you sure you want to delete this agent?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center">No agents found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+                <!-- Applications Tab -->
+<div class="tab-pane fade" id="applications" role="tabpanel" aria-labelledby="applications-tab">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Stu Phone No</th>
+                    <th>College</th>
+                    <th>College PH</th>
+                    <th>Course</th>
+                    <th>Applied At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.student.username }}</td>
+                    <td>{{ app.student.email }}</td>
+                    <td>{{ app.student.phone }}</td>
+                    <td>{{ app.college.name }}</td>
+                    <td>{{ app.college.mobile }}</td>
+                    <td>{{ app.course.name }}</td>
+                    <td>{{ app.applied_at|date:"d M Y, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No applications found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="tab-pane fade" id="qapply" role="tabpanel" aria-labelledby="qa-tab">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Student Phone No</th>
+                    <th>College</th>
+                    <th>Course</th>
+                    <th>Applied At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in qa %}
+                <tr>
+                    <td>{{ app.first_name }} {{ app.last_name }}</td>
+                    <td>{{ app.email }}</td>
+                    <td>{{ app.mobile }}</td>
+                    <td>{{ app.college }}</td>
+                    <td>{{ app.course }}</td>
+                    <td>{{ app.registration_date|date:"d M Y, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No applications found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

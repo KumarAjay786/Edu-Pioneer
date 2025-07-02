@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+
+{% block start %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="fas fa-book-open"></i> Manage Courses - {{ college.name }}
+        </h2>
+               <a href="{% url 'college_update_form' college.college_id %}" class="btn btn-primary">
+                        Update
+                    </a>
+        <a href="{% url 'college_staff_logout' %}" class="btn btn-danger">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+ 
+    </div>
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ADD COURSE FORM -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Add New Course</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" id="courseForm">
+                {% csrf_token %}
+                <input type="hidden" name="add_course" value="1">
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Course Name*</label>
+                        <input type="text" name="course_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Duration*</label>
+                        <input type="text" name="period" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Total Semesters*</label>
+                        <input type="number" name="total_semesters" id="totalSemesters" 
+                               class="form-control" min="1" max="12" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Total Fees (₹)*</label>
+                        <input type="number" name="total_fees" id="totalFees" 
+                               class="form-control" step="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Age Limit</label>
+                        <input type="number" name="age_limit" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Eligibility*</label>
+                        <textarea name="eligibility" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Eligibility Info (optional)</label>
+                        <textarea name="eligibility_info" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Semester Fee Distribution Section -->
+                <div id="semesterFeeContainer" class="semester-fee-container mt-4" style="display: none;">
+                    <h6><i class="fas fa-rupee-sign me-2"></i>Semester-wise Fee Distribution</h6>
+                    <div id="semesterFields"></div>
+                    <div class="total-fee-display mt-3">
+                        Allocated: ₹<span id="allocatedTotal">0</span> / 
+                        Remaining: ₹<span id="remainingTotal">0</span>
+                    </div>
+                    <div class="alert alert-warning mt-2" id="feeWarning" style="display: none;">
+                        The sum of semester fees must equal the total course fees.
+                    </div>
+                </div>
+
+                <center>
+                    <button type="submit" class="btn btn-primary mt-3" id="submitBtn">
+                        <i class="fas fa-plus"></i> Add Course
+                    </button>
+                </center>
+            </form>
+        </div>
+    </div>
+
+    <!-- COURSES LIST WITH EDIT/DELETE -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Existing Courses</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Duration</th>
+                            <th>Total Fees</th>
+                            <th>Semester Fees</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td>
+                                <strong>{{ course.name }}</strong>
+                                <div class="small text-muted">{{ course.eligibility|truncatechars:50 }}</div>
+                            </td>
+                            <td>{{ course.period }}</td>
+                            <td>₹{{ course.total_fees }}</td>
+                            <td>
+                                {% for fee in course.semester_fees.all %}
+                                    Sem {{ fee.semester_number }}: ₹{{ fee.fee_amount }}
+                                    {% if fee.includes_exam_fee %}(exam){% endif %}<br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <!-- EDIT FORM (Hidden by default) -->
+                                {% comment %} <form method="post" enctype="multipart/form-data" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="edit_course" value="1">
+                                    <input type="hidden" name="course_id" value="{{ course.id }}">
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn"
+                                            data-course-id="{{ course.id }}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    
+                                    <div class="edit-form  mt-3 p-3 bg-light rounded" id="edit-form-{{ course.id }}">
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-4">
+                                                <label>Course Name</label>
+                                                <input type="text" name="edit_name" value="{{ course.name }}" 
+                                                       class="form-control form-control-sm" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Duration</label>
+                                                <input type="text" name="edit_period" value="{{ course.period }}" 
+                                                       class="form-control form-control-sm" required>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>Total Semesters</label>
+                                                <input type="number" name="edit_total_semesters" 
+                                                       value="{{ course.total_semesters }}" id="editTotalSemesters{{ course.id }}"
+                                                       class="form-control form-control-sm" min="1" max="12" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>Total Fees (₹)</label>
+                                                <input type="number" name="edit_total_fees" 
+                                                       value="{{ course.total_fees }}" id="editTotalFees{{ course.id }}"
+                                                       class="form-control form-control-sm" step="0.01" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-6">
+                                                <label>Eligibility</label>
+                                                <textarea name="edit_eligibility" class="form-control form-control-sm" 
+                                                          rows="2" required>{{ course.eligibility }}</textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Eligibility Info</label>
+                                                <textarea name="edit_eligibility_info" class="form-control form-control-sm" 
+                                                          rows="2">{{ course.eligibility_info }}</textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-3">
+                                                <label>Age Limit</label>
+                                                <input type="number" name="edit_age_limit" value="{{ course.age_limit }}" 
+                                                       class="form-control form-control-sm">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Semester Fees Edit Section -->
+                                        <div class="semester-fee-edit-container" id="editSemesterFeeContainer{{ course.id }}">
+                                            <h6>Semester Fees:</h6>
+                                            <div class="edit-semester-fields" id="editSemesterFields{{ course.id }}">
+                                                {% for fee in course.semester_fees.all %}
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-2">
+                                                        <input type="text" class="form-control form-control-sm" 
+                                                               value="Sem {{ fee.semester_number }}" readonly>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text">₹</span>
+                                                            <input type="number" name="edit_semester_fee_{{ fee.semester_number }}" 
+                                                                   value="{{ fee.fee_amount }}" class="form-control form-control-sm">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" 
+                                                                   name="edit_semester_includes_exam_{{ fee.semester_number }}" 
+                                                                   id="edit_sem{{ fee.semester_number }}IncludesExam{{ course.id }}"
+                                                                   {% if fee.includes_exam_fee %}checked{% endif %}>
+                                                            <label class="form-check-label" for="edit_sem{{ fee.semester_number }}IncludesExam{{ course.id }}">
+                                                                Includes exam fee
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="edit-total-fee-display">
+                                                Allocated: ₹<span id="editAllocatedTotal{{ course.id }}">0</span> / 
+                                                Remaining: ₹<span id="editRemainingTotal{{ course.id }}">0</span>
+                                            </div>
+                                            <div class="alert alert-warning mt-2" id="editFeeWarning{{ course.id }}" style="display: none;">
+                                                The sum of semester fees must equal the total course fees.
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-end mt-3">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary cancel-edit-btn" 
+                                                    data-course-id="{{ course.id }}">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form> {% endcomment %}
+
+                                <!-- DELETE BUTTON -->
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_course" value="1">
+                                    <input type="hidden" name="delete_id" value="{{ course.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Are you sure you want to delete this course?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No courses found. Add your first course above.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Show the edit form when edit button is clicked
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const courseId = this.dataset.courseId;
+            const form = document.getElementById(`edit-form-${courseId}`);
+            form.classList.remove('d-none');
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+
+    // Hide the form when cancel is clicked
+    document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const courseId = this.dataset.courseId;
+            const form = document.getElementById(`edit-form-${courseId}`);
+            form.classList.add('d-none');
+        });
+    });
+});
+</script>
+
+<style>
+    .semester-fee-container, .semester-fee-edit-container {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+    .semester-row {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+    .total-fee-display, .edit-total-fee-display {
+        font-weight: bold;
+        padding: 8px;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+    .total-fee-display span, .edit-total-fee-display span {
+        color: #0d6efd;
+    }
+    #feeWarning, .alert-warning {
+        margin-bottom: 0;
+    }
+    .edit-form {
+        border: 1px solid #ddd;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle edit forms
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const formId = 'edit-form-' + this.dataset.courseId;
+            document.getElementById(formId).classList.toggle('d-none');
+            this.classList.toggle('d-none');
+        });
+    });
+    
+    // Cancel edit buttons
+    document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const courseId = this.dataset.courseId;
+            document.getElementById('edit-form-' + courseId).classList.add('d-none');
+            document.querySelector(`.edit-btn[data-course-id="${courseId}"]`).classList.remove('d-none');
+        });
+    });
+
+    // Main form semester fee management
+    const totalSemestersInput = document.getElementById('totalSemesters');
+    const totalFeesInput = document.getElementById('totalFees');
+    const semesterFieldsContainer = document.getElementById('semesterFields');
+    const semesterFeeContainer = document.getElementById('semesterFeeContainer');
+    const allocatedTotalSpan = document.getElementById('allocatedTotal');
+    const remainingTotalSpan = document.getElementById('remainingTotal');
+    const feeWarning = document.getElementById('feeWarning');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    let totalFees = 0;
+    let allocatedFees = 0;
+    
+    // Generate semester fields when total semesters is entered
+    totalSemestersInput.addEventListener('change', function() {
+        const numSemesters = parseInt(this.value);
+        
+        if (numSemesters > 0 && numSemesters <= 12) {
+            generateSemesterFields(numSemesters);
+            semesterFeeContainer.style.display = 'block';
+            updateFeeTotals();
+        } else {
+            semesterFeeContainer.style.display = 'none';
+        }
+    });
+    
+    // Update totals when total fees changes
+    totalFeesInput.addEventListener('input', function() {
+        totalFees = parseFloat(this.value) || 0;
+        updateFeeTotals();
+    });
+    
+    function generateSemesterFields(numSemesters) {
+        semesterFieldsContainer.innerHTML = '';
+        
+        for (let i = 1; i <= numSemesters; i++) {
+            const row = document.createElement('div');
+            row.className = 'row semester-row align-items-center';
+            
+            row.innerHTML = `
+                <div class="col-md-2">
+                    <label class="form-label">Semester ${i}</label>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control semester-fee" name="semester_fee_${i}" 
+                               placeholder="Enter fee" step="0.01" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="semester_includes_exam_${i}" id="sem${i}IncludesExam">
+                        <label class="form-check-label" for="sem${i}IncludesExam">
+                            Includes examination fee
+                        </label>
+                    </div>
+                </div>
+            `;
+            
+            semesterFieldsContainer.appendChild(row);
+        }
+        
+        // Add event listeners to all semester fee inputs
+        document.querySelectorAll('.semester-fee').forEach(input => {
+            input.addEventListener('input', updateFeeTotals);
+        });
+    }
+    
+    function updateFeeTotals() {
+        const semesterInputs = document.querySelectorAll('.semester-fee');
+        allocatedFees = 0;
+        
+        semesterInputs.forEach(input => {
+            allocatedFees += parseFloat(input.value) || 0;
+        });
+        
+        totalFees = parseFloat(totalFeesInput.value) || 0;
+        const remainingFees = totalFees - allocatedFees;
+        
+        allocatedTotalSpan.textContent = allocatedFees.toFixed(2);
+        remainingTotalSpan.textContent = Math.abs(remainingFees).toFixed(2);
+        
+        // Highlight if totals don't match
+        if (remainingFees !== 0) {
+            remainingTotalSpan.style.color = '#dc3545';
+            feeWarning.style.display = 'block';
+        } else {
+            remainingTotalSpan.style.color = '#198754';
+            feeWarning.style.display = 'none';
+        }
+    }
+
+    // Form validation before submission
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        const semesterInputs = document.querySelectorAll('.semester-fee');
+        let allFilled = true;
+        
+        semesterInputs.forEach(input => {
+            if (!input.value) {
+                allFilled = false;
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        if (parseFloat(allocatedTotalSpan.textContent) !== parseFloat(totalFeesInput.value)) {
+            e.preventDefault();
+            feeWarning.style.display = 'block';
+            return false;
+        }
+
+        if (!allFilled) {
+            e.preventDefault();
+            alert('Please fill in fees for all semesters.');
+            return false;
+        }
+
+        return true;
+    });
+
+    // Edit form semester fee management for each course
+    document.querySelectorAll('[id^="editTotalSemesters"]').forEach(input => {
+        const courseId = input.id.replace('editTotalSemesters', '');
+        input.addEventListener('change', function() {
+            generateEditSemesterFields(courseId, parseInt(this.value));
+            updateEditFeeTotals(courseId);
+        });
+    });
+
+    document.querySelectorAll('[id^="editTotalFees"]').forEach(input => {
+        const courseId = input.id.replace('editTotalFees', '');
+        input.addEventListener('input', function() {
+            updateEditFeeTotals(courseId);
+        });
+    });
+
+    function generateEditSemesterFields(courseId, numSemesters) {
+        const container = document.getElementById('editSemesterFields' + courseId);
+        container.innerHTML = '';
+        
+        for (let i = 1; i <= numSemesters; i++) {
+            const row = document.createElement('div');
+            row.className = 'row g-2 mb-2';
+            
+            row.innerHTML = `
+                <div class="col-md-2">
+                    <input type="text" class="form-control form-control-sm" 
+                           value="Sem ${i}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" name="edit_semester_fee_${i}" 
+                               class="form-control form-control-sm edit-semester-fee-${courseId}" 
+                               step="0.01">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                               name="edit_semester_includes_exam_${i}" 
+                               id="edit_sem${i}IncludesExam${courseId}">
+                        <label class="form-check-label" for="edit_sem${i}IncludesExam${courseId}">
+                            Includes exam fee
+                        </label>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(row);
+        }
+        
+        // Add event listeners to all semester fee inputs
+        document.querySelectorAll('.edit-semester-fee-' + courseId).forEach(input => {
+            input.addEventListener('input', function() {
+                updateEditFeeTotals(courseId);
+            });
+        });
+    }
+
+    function updateEditFeeTotals(courseId) {
+        const semesterInputs = document.querySelectorAll('.edit-semester-fee-' + courseId);
+        let allocatedFees = 0;
+        
+        semesterInputs.forEach(input => {
+            allocatedFees += parseFloat(input.value) || 0;
+        });
+        
+        const totalFees = parseFloat(document.getElementById('editTotalFees' + courseId).value) || 0;
+        const remainingFees = totalFees - allocatedFees;
+        
+        document.getElementById('editAllocatedTotal' + courseId).textContent = allocatedFees.toFixed(2);
+        document.getElementById('editRemainingTotal' + courseId).textContent = Math.abs(remainingFees).toFixed(2);
+        
+        // Highlight if totals don't match
+        if (remainingFees !== 0) {
+            document.getElementById('editRemainingTotal' + courseId).style.color = '#dc3545';
+            document.getElementById('editFeeWarning' + courseId).style.display = 'block';
+        } else {
+            document.getElementById('editRemainingTotal' + courseId).style.color = '#198754';
+            document.getElementById('editFeeWarning' + courseId).style.display = 'none';
+        }
+    }
+
+    // Initialize edit forms with current semester counts
+    document.querySelectorAll('.edit-form').forEach(form => {
+        const courseId = form.id.replace('edit-form-', '');
+        const totalSemesters = document.getElementById('editTotalSemesters' + courseId).value;
+        generateEditSemesterFields(courseId, parseInt(totalSemesters));
+        updateEditFeeTotals(courseId);
+    });
+});
+</script>
+{% endblock %}

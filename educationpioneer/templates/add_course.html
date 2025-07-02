@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-book-open me-2"></i>
+                Add New Course
+            </h3>
+        </div>
+        
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.name }}
+                            <label for="{{ form.name.id_for_label }}">Course Name</label>
+                            <div class="invalid-feedback">
+                                Please provide a course name.
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            {{ form.period }}
+                            <label for="{{ form.period.id_for_label }}">Duration</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            {{ form.total_fees }}
+                            <label for="{{ form.total_fees.id_for_label }}">Total Fees (₹)</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Course Logo</label>
+                            {{ form.logo }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">College Images</label>
+                            {{ form.college_images }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Width Fields -->
+                <div class="form-floating mb-3">
+                    {{ form.eligibility }}
+                    <label for="{{ form.eligibility.id_for_label }}">Eligibility Criteria</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    {{ form.eligibility_info }}
+                    <label for="{{ form.eligibility_info.id_for_label }}">Additional Eligibility Info</label>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'course_list' college_id=college.id %}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Bootstrap 5 form validation
+(() => {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %}

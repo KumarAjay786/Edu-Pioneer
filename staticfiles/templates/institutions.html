@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block start %}
+  <div class="college_listing_container">
+    <!-- Left Side Filters -->
+    <aside class="college_filter_sidebar">
+      <div class="filter_section">
+        <h3 class="filter_section_title">Location Filters</h3>
+        
+        <div class="filter_group">
+          <label class="filter_label">Country</label>
+          <select class="filter_dropdown" id="countryFilter">
+            <option value="all">All Countries</option>
+            <option value="ind">India</option>
+            <option value="us">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="ca">Canada</option>
+            <option value="au">Australia</option>
+           
+          </select>
+          
+        </div>
+        
+        <div class="filter_group">
+          <label class="filter_label">State/Province</label>
+          <select class="filter_dropdown" id="stateFilter" disabled>
+            <option value="all">All States/Provinces</option>
+            <!-- Will be populated by JavaScript -->
+          </select>
+        </div>
+        
+        <div class="filter_group">
+          <label class="filter_label">District</label>
+          <select class="filter_dropdown" id="cityFilter" disabled>
+            <option value="all">All District</option>
+            <!-- Will be populated by JavaScript -->
+          </select>
+        </div>
+      </div>
+      
+      <div class="filter_section">
+        <h3 class="filter_section_title">Academic Filters</h3>
+        
+        <div class="filter_group">
+          <label class="filter_label">Field of Study</label>
+          <select class="filter_dropdown" id="fieldFilter">
+            <option value="all">All Fields</option>
+            <option value="engineering">Engineering</option>
+            <option value="business">Business</option>
+            <option value="medicine">Medicine</option>
+            <option value="arts">Arts</option>
+          </select>
+        </div>
+        
+        <div class="filter_group">
+          <label class="filter_label">Degree Level</label>
+          <div class="filter_checkbox_group">
+            <label class="filter_checkbox_label">
+              <input type="checkbox" id="undergradCheckbox" checked> Undergraduate
+            </label>
+            <label class="filter_checkbox_label">
+              <input type="checkbox" id="gradCheckbox" checked> Graduate
+            </label>
+            <label class="filter_checkbox_label">
+              <input type="checkbox" id="phdCheckbox" checked> PhD
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="filter_section">
+        <h3 class="filter_section_title">Other Filters</h3>
+        
+        <div class="filter_group">
+          <label class="filter_label">Tuition Range (per year)</label>
+          <div class="filter_range_slider">
+            <input type="range" id="tuitionRange" min="0" max="100000" step="5000" value="100000" class="filter_range_input">
+            <div class="filter_range_values">
+              <span id="minTuition">$0</span> - 
+              <span id="maxTuition">$100,000+</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="filter_group">
+          <label class="filter_label">Admission Difficulty</label>
+          <select class="filter_dropdown" id="difficultyFilter">
+            <option value="all">All Levels</option>
+            <option value="easy">Easy (Acceptance > 50%)</option>
+            <option value="moderate">Moderate (30-50%)</option>
+            <option value="competitive">Competitive (15-30%)</option>
+            <option value="highly">Highly Competitive (< 15%)</option>
+          </select>
+        </div>
+      </div>
+      
+      <button class="filter_reset_btn" id="resetFilters">Reset All Filters</button>
+    </aside>
+    
+    <!-- Right Side College List -->
+    <div class="college_info_list" style="margin-top: 30px;">
+      <div class="college_list_header">
+        <h2 class="college_list_title" id="resultsCount">Matching Colleges</h2>
+       <div class="search-box">
+        <input type="text" class="search-input search_box_inside_instutution" placeholder="Search Colleges...">
+        <button class="search-btn">
+          <i class="fas fa-search search_box_inside_instutution_button"></i>
+        </button>
+      </div>
+        <div class="college_list_sort">
+          <label>Sort by:</label>
+          <select class="sort_dropdown" id="sortBy">
+            <option value="relevance">Relevance</option>
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="tuition-asc">Tuition (Low-High)</option>
+            <option value="tuition-desc">Tuition (High-Low)</option>
+          </select>
+        </div>
+        <a href="{% url 'college_register_form' %}" class="btn college_Details_Modal-btn-primary">Register Your College</a>
+      </div>
+      
+      <div id="collegeResultsContainer">
+        <!-- College listings will be inserted here by JavaScript -->
+      </div>
+      
+      <div class="college_list_pagination" id="paginationContainer">
+        <!-- Pagination will be inserted here by JavaScript -->
+      </div>
+    </div>
+  </div>
+<!-- College Details Modal -->
+<!-- <div class="modal fade" id="collegeDetailsModal" tabindex="-1" aria-labelledby="collegeDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="collegeDetailsModalLabel"></h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <img src="" class="img-fluid modal-college-image" alt="College Image">
+            <div class="mt-3">
+              <h4>Quick Facts</h4>
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Tuition:</span>
+                  <span class="modal-tuition"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Acceptance Rate:</span>
+                  <span class="modal-acceptance"></span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Location:</span>
+                  <span class="modal-location"></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h4>About</h4>
+            <p class="modal-description"></p>
+            <div class="mt-4">
+              <h4>Program Details</h4>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  <strong>Fields of Study:</strong> 
+                  <span class="modal-fields"></span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Degree Levels:</strong> 
+                  <span class="modal-degrees"></span>
+                </li>
+                <li class="list-group-item">
+                  <strong>Ranking:</strong> 
+                  <span class="modal-ranking"></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="apply.html" class="btn btn-primary">Apply Now</a>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+<div class="modal fade" id="collegeDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content college_Details_Modal-content">
+      <div class="modal-header college_Details_Modal-header">
+        <h2 class="modal-title college_Details_Modal-title" id="collegeDetailsModalLabel"></h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body college_Details_Modal-body">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <img src="" class="img-fluid college_Details_Modal-image modal-college-image" alt="College Image">
+            <div class="mt-4">
+              <h4 class="mb-3"><i class="fas fa-chart-line me-2"></i>Key Statistics</h4>
+              <ul class="list-group">
+                <li class="list-group-item college_Details_Modal-list-item">
+                  <span class="fact-label"><i class="fas fa-dollar-sign"></i>Annual Tuition</span>
+                  <span class="fact-value modal-tuition"></span>
+                </li>
+                <li class="list-group-item college_Details_Modal-list-item">
+                  <span class="fact-label"><i class="fas fa-percentage"></i>Acceptance Rate</span>
+                  <span class="fact-value modal-acceptance"></span>
+                </li>
+                <li class="list-group-item college_Details_Modal-list-item">
+                  <span class="fact-label"><i class="fas fa-map-marker-alt"></i> &nbsp;</span>
+                  <span class="fact-value modal-location"></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="program-details">
+              <h4 class="mb-3"><i class="fas fa-university me-2"></i>About Institution</h4>
+              <p class="modal-description text-muted lh-lg"></p>
+              
+              <div class="mt-4">
+                <h4 class="mb-3"><i class="fas fa-graduation-cap me-2"></i>Academic Profile</h4>
+                <ul class="list-group">
+                  <li class="list-group-item college_Details_Modal-list-item">
+                    <strong>Fields of Study:</strong>
+                    <span class="badge bg-primary rounded-pill modal-fields"></span>
+                  </li>
+                  <li class="list-group-item college_Details_Modal-list-item">
+                    <strong>Degree Levels:</strong>
+                    <span class="badge bg-success rounded-pill modal-degrees"></span>
+                  </li>
+                  <li class="list-group-item college_Details_Modal-list-item">
+                    <strong>Global Ranking:</strong>
+                    <span class="badge bg-warning text-dark rounded-pill modal-ranking"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer college_Details_Modal-footer">
+        <button type="button" class="btn college_Details_Modal-btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-2"></i>Close
+        </button>
+        <a href="apply.html" class="btn college_Details_Modal-btn-primary">
+          Start Application <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/../static/js/institutions_list.js"></script>
+  {% endblock  %}

@@ -1,0 +1,60 @@
+<!-- colleges/list.html -->
+{% extends 'base.html' %}
+
+{% block start %}
+<div class="container mt-4">
+    <h1 class="mb-4">Colleges</h1>
+    
+    <div class="row">
+        {% for college in colleges %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="card-title">{{ college.name }}</h3>
+                    
+                    <div class="card-text">
+                        <p><strong>Email:</strong> {{ college.email }}</p>
+                        <p><strong>Website:</strong> <a href="{{ college.website }}" target="_blank">{{ college.website }}</a></p>
+                        <p><strong>Contact:</strong> {{ college.mobile }}</p>
+                        
+                        <div class="address-section">
+                            <strong>Address:</strong>
+                            <p>{{ college.address }}, {{ college.district }}, {{ college.state }}, {{ college.country }}</p>
+                        </div>
+                        
+                        {% if college.images.all %}
+                        <div class="college-images mt-3">
+                            <strong>Gallery:</strong>
+                            <div class="d-flex flex-wrap">
+                                {% for image in college.images.all %}
+                                    <img src="{{ image.image.url }}" class="img-thumbnail m-1" style="max-height: 80px;" alt="College image">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if college.course_set.all %}
+                <div class="card-footer">
+                    <h5>Courses Offered:</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for course in college.course_set.all %}
+                        <li class="list-group-item">
+                            <strong>{{ course.name }}</strong> ({{ course.period }})
+                            <div class="course-details">
+                                <small>Fees: ₹{{ course.total_fees }}</small><br>
+                                <small>Eligibility: {{ course.eligibility }}</small><br>
+                                {% if course.age_limit %}<small>Age Limit: {{ course.age_limit }} years</small>{% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

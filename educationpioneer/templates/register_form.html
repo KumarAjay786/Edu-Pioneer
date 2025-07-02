@@ -1,0 +1,12 @@
+{% block start %}
+<!-- templates/college/register_form.html -->
+<form method="post">
+    {% csrf_token %}
+    <h2>College Registration</h2>
+    <input type="text" name="name" placeholder="College Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <!-- Add other registration fields -->
+    <button type="submit">Register</button>
+</form>
+{% endblock  %}

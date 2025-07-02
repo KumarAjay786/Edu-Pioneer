@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block start %}
+<style>
+    .login_section {
+        background: linear-gradient(to right, #004264, #1D789D);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .login-card {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .input-group-text {
+        background-color: #f0f0f0;
+    }
+
+    .toggle-password {
+        border: none;
+        background: transparent;
+    }
+</style>
+<section>
+<div class="login_section">
+<div class="login-card">
+    <h4 class="text-center mb-4">Login to Your Account</h4>
+    <form method="POST" enctype="multipart/form-data" action="{% url 'signup_view' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          {% if messages %}
+          <div>
+            {% for message in messages %}
+            <p class="message">{{ message }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input type="text" name="phone" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Profile Picture</label>
+          <input type="file" name="profile_pic" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create Account</button>
+      </form>
+      <br>
+    <div class="modal-footer border-0 justify-content-center">
+        
+        <p class="mb-0">Already have an account? <a href="{% url 'login_view'%}" id="showLogin" class="fw-bold"
+            style="color: #023751;">Login</a></p>
+      </div>
+</div>
+</div>
+<script>
+    const togglePasswordBtn = document.querySelector(".toggle-password");
+    const passwordField = document.getElementById("id_password");
+    const toggleIcon = document.getElementById("togglePasswordIcon");
+
+    togglePasswordBtn.addEventListener("click", () => {
+        const type = passwordField.type === "password" ? "text" : "password";
+        passwordField.type = type;
+        toggleIcon.classList.toggle("fa-eye");
+        toggleIcon.classList.toggle("fa-eye-slash");
+    });
+</script>
+</section>
+{% endblock %}

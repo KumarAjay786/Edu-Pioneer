@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Admin Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin_login_page_container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin_login_page_card {
+            width: 100%;
+            max-width: 450px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: none;
+        }
+        
+        .admin_login_page_header {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .admin_login_page_body {
+            padding: 30px;
+            background-color: white;
+        }
+        
+        .admin_login_page_title {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .admin_login_page_subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .admin_login_page_form_group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .admin_login_page_form_group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #555;
+        }
+        
+        .admin_login_page_form_control {
+            height: 50px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding-left: 45px;
+            transition: all 0.3s;
+        }
+        
+        .admin_login_page_form_control:focus {
+            border-color: #4b6cb7;
+            box-shadow: 0 0 0 0.25rem rgba(75, 108, 183, 0.25);
+        }
+        
+        .admin_login_page_icon {
+            position: absolute;
+            left: 15px;
+            top: 38px;
+            color: #777;
+        }
+        
+        .admin_login_page_btn {
+            height: 50px;
+            border-radius: 8px;
+            font-weight: 600;
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            border: none;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .admin_login_page_btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin_login_page_alert {
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin_login_page_container">
+        <div class="card admin_login_page_card">
+            <div class="admin_login_page_header">
+                <h3 class="admin_login_page_title">
+                    <i class="fas fa-university me-2"></i>College Admin Portal
+                </h3>
+                <p class="admin_login_page_subtitle">Sign in to manage your institution</p>
+            </div>
+            
+            <div class="card-body admin_login_page_body">
+                <!-- Display error messages -->
+                {% if messages %}
+                    <div class="alert alert-danger admin_login_page_alert">
+                        {% for message in messages %}
+                            <p class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="POST" class="form-signin">
+                    {% csrf_token %}
+                    
+                    <div class="admin_login_page_form_group">
+                        <label for="college_id">College ID</label>
+                        <i class="fas fa-id-card admin_login_page_icon"></i>
+                        <input type="text" name="college_id" id="college_id" 
+                               class="form-control admin_login_page_form_control" 
+                               placeholder="Enter College ID" required>
+                    </div>
+                    
+                    <div class="admin_login_page_form_group">
+                        <label for="password">Password</label>
+                        <i class="fas fa-lock admin_login_page_icon"></i>
+                        <input type="password" name="password" id="password" 
+                               class="form-control admin_login_page_form_control" 
+                               placeholder="Enter Password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 admin_login_page_btn">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
